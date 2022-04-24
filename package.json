@@ -1,0 +1,15 @@
+{
+  "name": "drone_ricardo_velozient",
+  "version": "1.0.0",
+  "description": "Drone Route Calculator for Velozient",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ricardo Rodrigues Malosso",
+  "license": "ISC",
+  "dependencies": {
+    "casual": "^1.6.2",
+    "stdio": "^2.1.1"
+  }
+}
