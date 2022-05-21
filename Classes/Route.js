@@ -2,8 +2,36 @@ const Drone = require("./Drone");
 const Location = require("./Location");
 
 module.exports = class Route {
-    constructor(arrayOfLocations, currentWeight){
-        this.arrayOfLocations = arrayOfLocations || [];
-        this.currentWeight = currentWeight || 0;
+  constructor(drone, locations) {
+    this.locations = [];
+
+    this.drone = drone;
+    this.currentWeight = 0;
+    if (locations) {
+      locations.forEach((location) => {
+        //todo validate
+        this.addLocation(location);
+      });
     }
-}
+  }
+
+  canAddLocation(location) {
+    return (
+      location.packageWeight < this.drone.weightCapacity - this.currentWeight
+    );
+  }
+
+  addLocation(location) {
+    //todo validation
+    if (this.canAddLocation(location)) {
+      this.locations.push(location);
+      this.currentWeight += location.packageWeight;
+      return true;
+    }
+    return false;
+  }
+
+  getRemainingCapacity() {
+    return this.drone.weightCapacity - this.currentWeight;
+  }
+};
