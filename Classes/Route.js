@@ -9,7 +9,6 @@ module.exports = class Route {
     this.currentWeight = 0;
     if (locations) {
       locations.forEach((location) => {
-        //todo validate
         this.addLocation(location);
       });
     }
@@ -22,7 +21,6 @@ module.exports = class Route {
   }
 
   addLocation(location) {
-    //todo validation
     if (this.canAddLocation(location)) {
       this.locations.push(location);
       this.currentWeight += location.packageWeight;

@@ -16,30 +16,21 @@
 const Drone = require("./Classes/Drone.js");
 const Location = require("./Classes/Location.js");
 const Route = require("./Classes/Route.js");
-//mock data generator
-var casual = require("casual");
-
+const fs = require("fs");
 let droneAmount = 0;
 let undeliveredPackages = 0;
-
-//as opposed to receiving an input file, the program generates random data
-// every time it's run.
-//I'm considering the requirement "The client should be able to run the project
-// and have the results displayed" when making
-//this specific decision.
-//This is something I would check with a product owner or client before deciding for myself, of course.
 
 main();
 
 function main() {
-  const { locations, drones } = generateTestData();
+  const { locations, drones } = parseFileData("input1.txt");
   const sortedLocations = sortPackagesDesc(locations); //important for First Fit
   const sortedDrones = sortDronesDesc(drones);
   const biggestDrone = sortedDrones[0]; //only uses the largest
 
   //generatest a list of routes and prints it
   const generatedRoutes = generateRoutesForDrone(sortedLocations, biggestDrone);
-  printRoutes(generatedRoutes);
+  printRoutes(generatedRoutes, drones, "output1.txt");
 }
 
 function generateTestData() {
@@ -74,6 +65,7 @@ function sortPackagesDesc(locations) {
 
   return tmpLocations;
 }
+
 function sortDronesDesc(drones) {
   const dronesToSort = [...drones];
   //my addition, sorts the drones from highest to lowest capacity
@@ -106,7 +98,7 @@ function generateRoutesForDrone(sortedLocations, drone) {
         break;
       }
     }
-    //if haven't find space in any routes, add new route
+    //if haven't found space in any routes, add new route
     if (!hasFit) {
       generatedRoutes.push(new Route(drone, [location]));
     }
@@ -115,12 +107,71 @@ function generateRoutesForDrone(sortedLocations, drone) {
   return generatedRoutes;
 }
 
-function printRoutes(routes) {
+function printRoutes(routes, drones, outputFilePath) {
+  let formattedDroneOutput = "";
   const routesByDrone = {};
+
   routes.forEach((route) => {
     routesByDrone[route.drone.name] = routesByDrone[route.drone.name] || [];
     routesByDrone[route.drone.name].push(route);
   });
 
-  console.log(JSON.stringify(routesByDrone, null, 2));
+  drones.forEach((drone) => {
+    formattedDroneOutput = formattedDroneOutput + "[" + drone.name + "]\n";
+
+    routesByDrone[drone.name.trim()]?.forEach((route, index) => {
+      let tmpLocationsString = [];
+      formattedDroneOutput += "Trip #" + (index + 1) + "\n";
+      route.locations.forEach((routeLocation) => {
+        tmpLocationsString.push("[" + routeLocation.name + "]");
+      });
+      formattedDroneOutput += tmpLocationsString.join(", ");
+      formattedDroneOutput += "\n";
+    });
+  });
+
+  //formattedDroneOutput = JSON.stringify(routesByDrone, null, 2);
+  fs.writeFileSync(outputFilePath, formattedDroneOutput);
+}
+
+function readTextFile(path) {
+  return fs
+    .readFileSync(path, { encoding: "utf8", flag: "r" })
+    .replace(new RegExp("[\\[\\]]", "g"), "") //regex to remove brackets
+    .replace(new RegExp("[\r]", "g"), "") //remove carriage return
+    .split("\n");
+}
+
+function parseTestData(data) {
+  const drones = [];
+  const locations = [];
+
+  const droneData = data[0].split(",");
+  //parses the first line containing drone data
+  for (let i = 0; i < droneData.length; i++) {
+    if (i % 2 == 1) {
+      drones.push(
+        new Drone(
+          droneData[i - 1].trim(), //drone name
+          parseInt(droneData[i].trim())
+        ) //drone weight limit
+      );
+    }
+  }
+
+  //parses the rest of the data, containing drone information
+  for (let i = 1; i < data.length; i++) {
+    let locationInformation = data[i].split(",");
+    locations.push(
+      new Location(
+        locationInformation[0].trim(), //location name
+        parseInt(locationInformation[1].trim()) //location package weight
+      )
+    );
+  }
+  return { locations, drones };
+}
+
+function parseFileData(path) {
+  return parseTestData(readTextFile(path));
 }
