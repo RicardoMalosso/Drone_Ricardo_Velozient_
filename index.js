@@ -119,15 +119,16 @@ function printRoutes(routes, drones, outputFilePath) {
   drones.forEach((drone) => {
     formattedDroneOutput = formattedDroneOutput + "[" + drone.name + "]\n";
 
-    routesByDrone[drone.name.trim()]?.forEach((route, index) => {
-      let tmpLocationsString = [];
-      formattedDroneOutput += "Trip #" + (index + 1) + "\n";
-      route.locations.forEach((routeLocation) => {
-        tmpLocationsString.push("[" + routeLocation.name + "]");
+    if (routesByDrone[drone.name.trim()])
+      routesByDrone[drone.name.trim()].forEach((route, index) => {
+        let tmpLocationsString = [];
+        formattedDroneOutput += "Trip #" + (index + 1) + "\n";
+        route.locations.forEach((routeLocation) => {
+          tmpLocationsString.push("[" + routeLocation.name + "]");
+        });
+        formattedDroneOutput += tmpLocationsString.join(", ");
+        formattedDroneOutput += "\n";
       });
-      formattedDroneOutput += tmpLocationsString.join(", ");
-      formattedDroneOutput += "\n";
-    });
   });
 
   //formattedDroneOutput = JSON.stringify(routesByDrone, null, 2);
